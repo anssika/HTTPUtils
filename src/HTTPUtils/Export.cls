@@ -53,7 +53,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 /// By default, this base name is appended with a string
 /// describing the content of the file (classes, CSP pages, business rules etc.)
 /// and extension ".xml"
-Parameter FILENAME As %String = "HTTPUtils_2022_11_03";
+Parameter FILENAME As %String = "HTTPUtils_2022_12_30";
 
 /// Folder to create the export files in, when running this program in Windows.
 /// Specify an absolute path and end it with "\"

@@ -55,6 +55,9 @@ Method HTTPRequest(pRequest As HTTPUtils.Message.HTTPRequest, Output pResponse A
 	Set pResponse.StatusLine = tHTTPResponse.StatusLine
 	Set pResponse.MessageBody = tHTTPResponse.Data
 	If ($IsObject(tHTTPResponse.Data)) {
+ $$$LOGINFO("tHTTPResponse.Data.Size = " _ tHTTPResponse.Data.Size)
+ $$$LOGINFO("tHTTPResponse.Data.Read() = " _ tHTTPResponse.Data.Read())
+ Do tHTTPResponse.Data.Rewind()
 		Set pResponse.MessageBody = ""
 		While ('tHTTPResponse.Data.AtEnd) {
 			Set pResponse.MessageBody = pResponse.MessageBody _ tHTTPResponse.Data.Read()
