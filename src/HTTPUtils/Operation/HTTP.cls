@@ -1,9 +1,11 @@
 Class HTTPUtils.Operation.HTTP Extends Ens.BusinessOperation
 {
 
-Parameter ADAPTER = "EnsLib.HTTP.OutboundAdapter";
+/// Parameter ADAPTER = "EnsLib.HTTP.OutboundAdapter";
+Parameter ADAPTER = "HTTPUtils.HTTP.OutboundAdapter";
 
-Property Adapter As EnsLib.HTTP.OutboundAdapter;
+/// Property Adapter As EnsLib.HTTP.OutboundAdapter;
+Property Adapter As HTTPUtils.HTTP.OutboundAdapter;
 
 Parameter INVOCATION = "Queue";
 
@@ -11,53 +13,59 @@ Method HTTPRequest(pRequest As HTTPUtils.Message.HTTPRequest, Output pResponse A
 {
 	#Dim tStatus As %Status
 
+	#Dim tHTTPRequest As %Net.HttpRequest = ##class(%Net.HttpRequest).%New()
+
+	// HTTP Body
+	Do tHTTPRequest.EntityBody.Write(pRequest.Body)
+
+	// URL
 	#Dim tURL As %String = ..Adapter.URL _ "/" _ pRequest.URL
 	Set tURL = $Replace(tURL, "//", "/")
 	$$$LOGINFO("About to invoke " _ pRequest.Method _ " " _ tURL)
 
-	#Dim tHTTPRequest As %Net.HttpRequest = ##class(%Net.HttpRequest).%New()
+	// HTTP Headers
 	#Dim i As %Integer
 	For i=1:1:3 {
 		#Dim tHeaderName As %String = $Property(pRequest, "Header" _ i _ "Name")
 		#Dim tHeaderValue As %String = $Property(pRequest, "Header" _ i _ "Value")
-		If (tHeaderName = "Content-Type") {
+		If ($ZConvert(tHeaderName, "U") = "CONTENT-TYPE") {
+			$$$LOGINFO("Setting tHTTPRequest.ContentType = " _ tHeaderValue) 
 			Set tHTTPRequest.ContentType = tHeaderValue
 		}
 		ElseIf (tHeaderName '= "") {
-			$$$LOGINFO("Header " _ tHeaderName _ " with value " _ tHeaderValue _ " ignored") 
+			$$$LOGINFO("Setting header " _ tHeaderName _ " with value " _ tHeaderValue _ " of tHTTPRequest")
+			Do tHTTPRequest.SetHeader(tHeaderName, tHeaderValue)
 		}
 	}
 
+	// Invoke HTTP
 	#Dim tHTTPResponse As %Net.HttpResponse
 	If (pRequest.Method = "GET") {
 		Set tStatus = ..InvokeHTTP(tHTTPRequest, pRequest.Method, tURL, .tHTTPResponse)
 	}
 	ElseIf ((pRequest.Method = "POST") || (pRequest.Method = "PUT") || (pRequest.Method = "DELETE")) {
-		Set tStatus = ..InvokeHTTP(tHTTPRequest, pRequest.Method, tURL, .tHTTPResponse,, pRequest.HTTPBody)
+		Set tStatus = ..InvokeHTTP(tHTTPRequest, pRequest.Method, tURL, .tHTTPResponse)
 	}
 	Else {
 		Set tStatus = $$$ERROR($$$GeneralError, "Unexpected HTTPMethod " _ pRequest.Method)
 	}
 
-	If ($$$ISERR(tStatus)) {
-		If ($IsObject($Get(tHTTPResponse))) {
-			// To return more information about the error (the HTTP body),
-			// return an interoperability message instead of a %Status
-			// But (additionally) log the status
-			$$$LOGSTATUS(tStatus)
-		}
-		Else {
-			Return tStatus
-		}
+	// Error?
+	If ($$$ISERR(tStatus)) Return tStatus
+
+	// HTTP headers returned
+	#Dim tValue As %String = ""
+	#Dim tHeader As %String = $Order(tHTTPResponse.Headers(""), 1, tValue)
+	While (tHeader '= "") {
+		$$$LOGINFO("HTTP Header received: name = " _ tHeader _ ", value = " _ tValue)
+		Set tHeader = $Order(tHTTPResponse.Headers(tHeader), 1, tValue)
 	}
 
+	// Create return message
 	Set pResponse = ##class(HTTPUtils.Message.HTTPResponse).%New()
 	Set pResponse.StatusLine = tHTTPResponse.StatusLine
 	Set pResponse.MessageBody = tHTTPResponse.Data
 	If ($IsObject(tHTTPResponse.Data)) {
- $$$LOGINFO("tHTTPResponse.Data.Size = " _ tHTTPResponse.Data.Size)
- $$$LOGINFO("tHTTPResponse.Data.Read() = " _ tHTTPResponse.Data.Read())
- Do tHTTPResponse.Data.Rewind()
 		Set pResponse.MessageBody = ""
 		While ('tHTTPResponse.Data.AtEnd) {
 			Set pResponse.MessageBody = pResponse.MessageBody _ tHTTPResponse.Data.Read()

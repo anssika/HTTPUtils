@@ -6,10 +6,10 @@ XData ProductionDefinition
 <Production Name="HTTPUtils.TestProduction" TestingEnabled="true" LogGeneralTraceEvents="false">
   <Description></Description>
   <ActorPoolSize>2</ActorPoolSize>
-  <Item Name="HTTPServiceAdapter" Category="" ClassName="HTTPUtils.Service.HTTP" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+  <Item Name="HTTPService_AdapterInspect" Category="" ClassName="HTTPUtils.Service.HTTP" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
     <Setting Target="Adapter" Name="Port">51000</Setting>
   </Item>
-  <Item Name="To_HTTPServiceAdapter" Category="" ClassName="HTTPUtils.Operation.HTTP" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+  <Item Name="To_HTTPService_AdapterInspect" Category="" ClassName="HTTPUtils.Operation.HTTP" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
     <Setting Target="Adapter" Name="HTTPPort">51000</Setting>
     <Setting Target="Adapter" Name="HTTPServer">localhost</Setting>
     <Setting Target="Adapter" Name="URL">/HTTPUtils</Setting>
@@ -27,7 +27,7 @@ XData ProductionDefinition
     <Setting Target="Adapter" Name="ResponseTimeout">10</Setting>
   </Item>
   <Item Name="To_LocalFHIRToLabEx" Category="" ClassName="HTTPUtils.Operation.HTTP" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
-    <Setting Target="Adapter" Name="HTTPPort">52779</Setting>
+    <Setting Target="Adapter" Name="HTTPPort">52773</Setting>
     <Setting Target="Adapter" Name="HTTPServer">localhost</Setting>
     <Setting Target="Host" Name="FailureTimeout">5</Setting>
   </Item>
