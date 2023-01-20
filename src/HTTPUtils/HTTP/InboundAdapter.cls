@@ -11,6 +11,9 @@ Parameter SERVICEINPUTCLASS = "%Stream.Object";
 
 Parameter SERVICEOUTPUTCLASS = "%Stream.Object";
 
+/// Set to true to write log to ^HTTPUtils.IA
+Property WriteLog As %Boolean [ InitialExpression = 0 ];
+
 /// Local TCP port to listen on for HTTP requests
 Property Port As Ens.DataType.TCPAgentPort [ InitialExpression = "9980", Required ];
 
@@ -23,7 +26,7 @@ Property Charset As %String [ InitialExpression = "Auto" ];
 /// If True, use the Charset setting rather than any charset that may be declared in the incoming HTTP header Content-Type field
 Property ForceCharset As %Boolean [ InitialExpression = 0 ];
 
-Parameter SETTINGS = "Charset::selector?context={Ens.ContextSearch/CharacterSets},ForceCharset";
+Parameter SETTINGS = "WriteLog:Basic,Charset::selector?context={Ens.ContextSearch/CharacterSets},ForceCharset";
 
 /* (override Setting's InitialExpression inherited from base class) */
 /// If non-zero, stay connected to the remote system between handling Requests until idle for this number of seconds. A value of -1 means never disconnect.
@@ -402,8 +405,10 @@ Method faultStream(pStatus As %Status) As %GlobalBinaryStream [ Private ]
 	Quit tStream
 }
 
-ClassMethod Log(pText As %String)
+Method Log(pText As %String)
 {
+	If ('..WriteLog) Return
+
 	#Dim tSubscript = $Increment(^HTTPUtils.IA)
 	Set ^HTTPUtils.IA(tSubscript) = $ZDateTime($Horolog, 3) _ ": " _ pText
 

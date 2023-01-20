@@ -4,7 +4,7 @@ Class HTTPUtils.Message.HTTPResponse Extends Ens.Response
 /// HTTP Status Line
 Property StatusLine As %String;
 
-Property MessageBody As %String(MAXLEN = "");
+Property Body As %String(MAXLEN = "");
 
 Storage Default
 {
@@ -14,7 +14,7 @@ Storage Default
 <Value>StatusLine</Value>
 </Value>
 <Value name="2">
-<Value>MessageBody</Value>
+<Value>Body</Value>
 </Value>
 </Data>
 <DefaultData>HTTPResponseDefaultData</DefaultData>

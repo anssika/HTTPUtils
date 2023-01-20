@@ -7,6 +7,9 @@
 Class HTTPUtils.HTTP.OutboundAdapter Extends Ens.OutboundAdapter [ ClassType = "", ProcedureBlock, System = 4 ]
 {
 
+/// Set to true to write log to ^HTTPUtils.IA
+Property WriteLog As %Boolean [ InitialExpression = 0 ];
+
 /// IP address of the server to send HTTP requests to.
 Property HTTPServer As %String(MAXLEN = 1000) [ Required ];
 
@@ -65,7 +68,7 @@ Property WriteTimeout As %Numeric(MINVAL = -1) [ InitialExpression = -1 ];
 Property LocalInterface As %String(MAXLEN = 250);
 
 /// These are the production settings for this object
-Parameter SETTINGS = "RegistryID:Basic:selector?context={Ens.ServiceRegistry.External.ContextSearch/Services?Protocols_1=REST&Protocols_2=HTTP},HTTPServer:Basic,HTTPPort:Basic,SSLConfig:Connection:sslConfigSelector,SSLCheckServerIdentity:Connection,LocalInterface:Connection:selector?context={Ens.ContextSearch/TCPLocalInterfaces},ProxyServer:Connection,ProxyPort:Connection,ProxyHTTPS:Connection,ProxyHttpTunnel:Connection,URL:Basic,Credentials:Basic:credentialsSelector,UseCookies,ConnectTimeout:Connection,ResponseTimeout:Connection,WriteTimeout:Connection,ProvideMetricsForSAM:Alerting";
+Parameter SETTINGS = "WriteLog:Basic,RegistryID:Basic:selector?context={Ens.ServiceRegistry.External.ContextSearch/Services?Protocols_1=REST&Protocols_2=HTTP},HTTPServer:Basic,HTTPPort:Basic,SSLConfig:Connection:sslConfigSelector,SSLCheckServerIdentity:Connection,LocalInterface:Connection:selector?context={Ens.ContextSearch/TCPLocalInterfaces},ProxyServer:Connection,ProxyPort:Connection,ProxyHTTPS:Connection,ProxyHttpTunnel:Connection,URL:Basic,Credentials:Basic:credentialsSelector,UseCookies,ConnectTimeout:Connection,ResponseTimeout:Connection,WriteTimeout:Connection,ProvideMetricsForSAM:Alerting";
 
 /// Array of Cookies. Indexed by Domain/Server; each element is $LB(name, domain, path, value, expires, secure)
 Property %Cookies As %String [ MultiDimensional, Transient ];
@@ -478,8 +481,10 @@ Method OnTearDown() As %Status
 	Return ##super()
 }
 
-ClassMethod Log(pText As %String)
+Method Log(pText As %String)
 {
+	If ('..WriteLog) Return
+
 	#Dim tSubscript = $Increment(^HTTPUtils.OA)
 	Set ^HTTPUtils.OA(tSubscript) = $ZDateTime($Horolog, 3) _ ": " _ pText
 
